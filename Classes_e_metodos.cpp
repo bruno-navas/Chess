@@ -11,6 +11,16 @@ Peca::Peca(wchar_t simbolo, int x, int y) {
     _y = y;
 }
 
+void troca_posicao(unique_ptr<Peca> &p1, unique_ptr<Peca> &p2) {
+
+    int x_aux = p1->_x;
+    int y_aux = p1->_y;
+    p1->_x = p2->_x;
+    p1->_y = p2->_y;
+    p2->_x = x_aux;
+    p2->_y = y_aux;
+}
+
 Tabuleiro::Tabuleiro() {
 
     tabuleiro = {
@@ -38,9 +48,9 @@ void Tabuleiro::imprimir_Tabuleiro() const{
             bool peca_branca = !peca_preta;
 
             if (peca_branca) {
-                setColor(7, peca_branca ? 0 : 0);
+                setColor(7, 0);
             } else {
-                setColor(0, peca_branca ? 15 : 8);
+                setColor(0, 8);
             }
 
             visit([](const auto& p) { p.imprimirSimbolo(); }, y);
@@ -53,27 +63,126 @@ void Tabuleiro::imprimir_Tabuleiro() const{
     }
 }
 
-bool Peao::checa_movimento(char coluna, int linha, vector<vector<Variants>> tabuleiro) const {
-    int col = static_cast<int>(coluna) - 65;
-    linha = linha--;
+unique_ptr<Peca> Tabuleiro::descobre_tipo(int x, int y) const {
+    if (std::holds_alternative<Peca>(tabuleiro[x][y])) {
+        auto p = std::get<Peca>(tabuleiro[x][y]);
+        return make_unique<Peca>(p._simbolo, x, y);
+    }
+    if (std::holds_alternative<Peao>(tabuleiro[x][y])) {
+        auto p = std::get<Peao>(tabuleiro[x][y]);
+        return make_unique<Peao>(p._simbolo,x,y);
+    }
+    if (std::holds_alternative<Torre>(tabuleiro[x][y])) {
+        auto p = std::get<Torre>(tabuleiro[x][y]);
+        return make_unique<Torre>(p._simbolo,x,y);
+    }
+    if (std::holds_alternative<Cavalo>(tabuleiro[x][y])) {
+        auto p = std::get<Cavalo>(tabuleiro[x][y]);
+        return make_unique<Cavalo>(p._simbolo,x,y);
+    }
+    if (std::holds_alternative<Bispo>(tabuleiro[x][y])) {
+        auto p = std::get<Bispo>(tabuleiro[x][y]);
+        return make_unique<Bispo>(p._simbolo,x,y);
+    }
+    if (std::holds_alternative<Rainha>(tabuleiro[x][y])) {
+        auto p = std::get<Rainha>(tabuleiro[x][y]);
+        return make_unique<Rainha>(p._simbolo,x,y);
+    }
+    if (std::holds_alternative<Rei>(tabuleiro[x][y])) {
+        auto p = std::get<Rei>(tabuleiro[x][y]);
+        return make_unique<Rei>(p._simbolo,x,y);
+    }
+    return make_unique<Peca>();
+}
 
-    auto p = get<Peao>(tabuleiro[_x][_y]);
+void Peao::movimento(wchar_t coluna, int x, Tabuleiro &t)  {
+    const int y = static_cast<int>(coluna) - 65;
+    x = 8-x;
 
-    //(piece >= L'\u2654' && piece <= L'\u2659')
-
-    /*bool flag;
-
-    if(col>7 or linha>7) {
-        return false;
+    //Checa se a jogada desejada esta dentro do tabuleiro
+    if((y>7 or x>7)or(y<0 or x<0)) {
+        wcout << "Jogada invalida1" << endl;
+        return;
     }
 
-    if(_x==1 or _x==6) {
-        if(col = _y and (linha==_x))
-    }*/
+    auto p_atual = t.descobre_tipo(_x, _y);
+    auto p_nova = t.descobre_tipo(x, y);
 
-    return false;
+    //Peça preta
+    if(!(p_atual->_simbolo >= L'\u2654' and p_atual->_simbolo <= L'\u2659')) {
+        if(_x==1) {
+            if(y==_y and (x==_x+1 or x==_x+2)) {
+                troca_posicao(p_atual, p_nova); //Inverte o indice das peças
+                swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+            }
+            else {
+                wcout << "Jogada invalida" << endl;
+                return;
+            }
+        }
+        else {
+            if(y==_y and x==_x+1) {
+                troca_posicao(p_atual, p_nova); //Inverte o indice das peças
+                swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+            }
+            else {
+                wcout << "Jogada invalida" << endl;
+            }
+        }
+    }
 
+    //Peça branca
+    else {
+        if(_x==6) {
+            if(y==_y and (x==_x-1 or x==_x-2)) {
+                troca_posicao(p_atual, p_nova); //Inverte o indice das peças
+                swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+            }
+            else {
+                wcout << "Jogada invalida2" << endl;
+            }
+        }
+        else {
+            if(y==_y and x==_x-1) {
+                troca_posicao(p_atual, p_nova); //Inverte o indice das peças
+                swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+            }
+            else {
+                wcout << "Jogada invalida3" << endl;
+            }
+        }
+    }
+    _x = p_atual->_x;
+    _y = p_atual->_y;
 }
+
+bool Tabuleiro::jogada(wchar_t y_o, int x_o, wchar_t y_d, int x_d, const bool vez) {
+    const int y1_o = static_cast<int>(y_o) - 65;
+    x_o = 8-x_o;
+
+    if (vez) {
+        auto p_origem = this->descobre_tipo(x_o, y1_o);
+        if(p_origem->_simbolo >= L'\u2654' and p_origem->_simbolo <= L'\u2659') {
+            p_origem->movimento(y_d, x_d, *this);
+        }
+        else {
+            wcout << "Jogada invalida" << endl;
+            return false;
+        }
+    }
+    else {
+        auto p_origem = this->descobre_tipo(x_o, y1_o);
+        if(!(p_origem->_simbolo >= L'\u2654' and p_origem->_simbolo <= L'\u2659')) {
+            p_origem->movimento(y_d, x_d, *this);
+        }
+        else {
+            wcout << "Jogada invalida" << endl;
+            return false;
+        }
+    }
+    return true;
+}
+
 
 
 

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <variant>
+#include <memory>
 #include <windows.h>
 using namespace std;
 
@@ -14,8 +15,20 @@ class Cavalo;
 class Bispo;
 class Rei;
 class Rainha;
+class Tabuleiro;
 
 using Variants = variant<Peca, Peao, Torre, Cavalo, Bispo, Rei, Rainha>;
+
+class Tabuleiro {
+public:
+    vector<vector<Variants>> tabuleiro;
+
+    Tabuleiro();
+
+    void imprimir_Tabuleiro() const;
+    [[nodiscard]] unique_ptr<Peca> descobre_tipo(int x, int y) const;
+    bool jogada(wchar_t y_o, int x_o, wchar_t y_d, int x_d, bool vez);
+};
 
 class Peca {
 protected:
@@ -31,9 +44,11 @@ public:
         wcout << L" " << _simbolo << L" ";
     }
 
-    [[nodiscard]] virtual bool checa_movimento(char coluna, int linha, vector<vector<Variants>> tabuleiro) const{return true;}
+    virtual void movimento(wchar_t coluna, int linha, Tabuleiro &t) {};
+    friend void troca_posicao(unique_ptr<Peca> &p1, unique_ptr<Peca> &p2);
 
     friend class Tabuleiro;
+    friend class Peao;
 };
 
 class Peao : public Peca {
@@ -44,7 +59,7 @@ public:
         wcout << L" " << _simbolo << L" ";
     }
 
-    [[nodiscard]] bool checa_movimento(char coluna, int linha, vector<vector<Variants>> tabuleiro) const override;
+    void movimento(wchar_t coluna, int linha, Tabuleiro &t) override;
 };
 
 class Torre : public Peca {
@@ -90,15 +105,6 @@ public:
     void imprimirSimbolo() const override {
         wcout << L" " << _simbolo << L" ";
     }
-};
-
-class Tabuleiro {
-public:
-    vector<vector<Variants>> tabuleiro;
-
-    Tabuleiro();
-
-    void imprimir_Tabuleiro() const;
 };
 
 
