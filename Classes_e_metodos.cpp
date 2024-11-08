@@ -532,7 +532,9 @@ bool Tabuleiro::jogada(wchar_t y_o, int x_o, wchar_t y_d, int x_d, const bool ve
     if (vez) {
         auto p_origem = this->descobre_tipo(x_o, y1_o);
         if(p_origem->eh_branco()) {
-            p_origem->movimento(y_d, x_d, *this);
+                if(!p_origem->movimento(y_d, x_d, *this)) {
+                    return false;
+                }
         }
         else {
             wcout << "Jogada invalidaBABA" << endl;
@@ -542,7 +544,9 @@ bool Tabuleiro::jogada(wchar_t y_o, int x_o, wchar_t y_d, int x_d, const bool ve
     else {
         auto p_origem = this->descobre_tipo(x_o, y1_o);
         if(!p_origem->eh_branco()) {
-            p_origem->movimento(y_d, x_d, *this);
+            if(!p_origem->movimento(y_d, x_d, *this)) {
+                return false;
+            }
         }
         else {
             wcout << "Jogada invalidaLALA" << endl;
