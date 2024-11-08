@@ -5,6 +5,7 @@
 #include <vector>
 #include <variant>
 #include <memory>
+#include <cmath>
 #include <windows.h>
 using namespace std;
 
@@ -31,11 +32,10 @@ public:
 };
 
 class Peca {
-protected:
+public:
     wchar_t _simbolo;
     int _x, _y;
 
-public:
     virtual ~Peca() = default;
 
     explicit Peca(wchar_t simbolo=L'\u3000', int x=0, int y=0);
@@ -43,12 +43,18 @@ public:
     virtual void imprimirSimbolo() const {
         wcout << L" " << _simbolo << L" ";
     }
+    [[nodiscard]] bool eh_branco() const {
+        if(_simbolo >= L'\u2654' and _simbolo <= L'\u2659') {
+            return true;
+        }
+        if(_simbolo>=L'\u265A' and _simbolo<=L'\u265F') {
+            return false;
+        }
+        return false;
+    }
 
-    virtual void movimento(wchar_t coluna, int linha, Tabuleiro &t) {};
+    virtual bool movimento(wchar_t coluna, int x, Tabuleiro &t) {return false;}
     friend void troca_posicao(unique_ptr<Peca> &p1, unique_ptr<Peca> &p2);
-
-    friend class Tabuleiro;
-    friend class Peao;
 };
 
 class Peao : public Peca {
@@ -59,7 +65,7 @@ public:
         wcout << L" " << _simbolo << L" ";
     }
 
-    void movimento(wchar_t coluna, int linha, Tabuleiro &t) override;
+    bool movimento(wchar_t coluna, int x, Tabuleiro &t) override;
 };
 
 class Torre : public Peca {
@@ -69,6 +75,7 @@ public:
     void imprimirSimbolo() const override {
         wcout << L" " << _simbolo << L" ";
     }
+    bool movimento(wchar_t coluna, int x, Tabuleiro &t) override;
 };
 
 class Cavalo : public Peca {
@@ -78,6 +85,7 @@ public:
     void imprimirSimbolo() const override {
         wcout << L" " << _simbolo << L" ";
     }
+    bool movimento(wchar_t coluna, int x, Tabuleiro &t) override;
 };
 
 class Bispo : public Peca {

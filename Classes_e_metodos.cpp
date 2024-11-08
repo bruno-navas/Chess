@@ -95,65 +95,434 @@ unique_ptr<Peca> Tabuleiro::descobre_tipo(int x, int y) const {
     return make_unique<Peca>();
 }
 
-void Peao::movimento(wchar_t coluna, int x, Tabuleiro &t)  {
+bool Peao::movimento(wchar_t coluna, int x, Tabuleiro &t)  {
     const int y = static_cast<int>(coluna) - 65;
     x = 8-x;
 
     //Checa se a jogada desejada esta dentro do tabuleiro
     if((y>7 or x>7)or(y<0 or x<0)) {
         wcout << "Jogada invalida1" << endl;
-        return;
+        return false;
+    }
+
+    if(y==_y and x==_x) {
+        wcout << "Jogada invalida2" << endl;
+        return false;
     }
 
     auto p_atual = t.descobre_tipo(_x, _y);
     auto p_nova = t.descobre_tipo(x, y);
 
     //Peça preta
-    if(!(p_atual->_simbolo >= L'\u2654' and p_atual->_simbolo <= L'\u2659')) {
-        if(_x==1) {
-            if(y==_y and (x==_x+1 or x==_x+2)) {
+    if(!p_atual->eh_branco()) {
+        if(_x==1) { //Primeiro movimento
+            if(y==_y and (x==_x+1 or x==_x+2) and p_nova->_simbolo==L'\u3000') { //Movimento para a frente
                 troca_posicao(p_atual, p_nova); //Inverte o indice das peças
                 swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+
+                _x = p_atual->_x;
+                _y = p_atual->_y;
+                return true;
             }
-            else {
-                wcout << "Jogada invalida" << endl;
-                return;
-            }
-        }
-        else {
-            if(y==_y and x==_x+1) {
+            if(((y==_y-1 and x==_x+1) or (y==_y+1 and x==_x+1)) and p_nova->eh_branco()) {
                 troca_posicao(p_atual, p_nova); //Inverte o indice das peças
                 swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+                t.tabuleiro[_x][_y] = Peca(L'\u3000', _x, _y); //Reseta o valor da casa de origem
+
+                _x = p_atual->_x;
+                _y = p_atual->_y;
+                return true;
             }
-            else {
-                wcout << "Jogada invalida" << endl;
-            }
+
+            wcout << "Jogada invalida3" << endl;
+            return false;;
+
         }
+        if(y==_y and x==_x+1 and p_nova->_simbolo==L'\u3000') { //Movimento para a frente
+            troca_posicao(p_atual, p_nova); //Inverte o indice das peças
+            swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+
+            _x = p_atual->_x;
+            _y = p_atual->_y;
+            return true;
+        }
+        if(((y==_y-1 and x==_x+1) or (y==_y+1 and x==_x+1)) and p_nova->eh_branco()) {
+            troca_posicao(p_atual, p_nova); //Inverte o indice das peças
+            swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+            t.tabuleiro[_x][_y] = Peca(L'\u3000', _x, _y); //Reseta o valor da casa de origem
+
+            _x = p_atual->_x;
+            _y = p_atual->_y;
+            return true;
+        }
+
+        wcout << "Jogada invalida4" << endl;
+        return false;
     }
 
     //Peça branca
     else {
-        if(_x==6) {
-            if(y==_y and (x==_x-1 or x==_x-2)) {
+        if(_x==6) { //Primeiro movimento
+            if(y==_y and (x==_x-1 or x==_x-2) and p_nova->_simbolo==L'\u3000') { //Movimento para a frente
                 troca_posicao(p_atual, p_nova); //Inverte o indice das peças
                 swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+
+                _x = p_atual->_x;
+                _y = p_atual->_y;
+                return true;
+            }
+            if(((y==_y-1 and x==_x-1) or (y==_y+1 and x==_x-1)) and !p_nova->eh_branco()) {
+                troca_posicao(p_atual, p_nova); //Inverte o indice das peças
+                swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+                t.tabuleiro[_x][_y] = Peca(L'\u3000', _x, _y); //Reseta o valor da casa de origem
+
+                _x = p_atual->_x;
+                _y = p_atual->_y;
+                return true;
+            }
+
+            wcout << "Jogada invalida5" << endl;
+            return false;
+        }
+        if(y==_y and x==_x-1 and p_nova->_simbolo==L'\u3000') { //Movimento para a frente
+            troca_posicao(p_atual, p_nova); //Inverte o indice das peças
+            swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+
+            _x = p_atual->_x;
+            _y = p_atual->_y;
+            return true;
+        }
+        if(((y==_y-1 and x==_x-1) or (y==_y+1 and x==_x-1)) and !p_nova->eh_branco()) {
+            troca_posicao(p_atual, p_nova); //Inverte o indice das peças
+            swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+            t.tabuleiro[_x][_y] = Peca(L'\u3000', _x, _y); //Reseta o valor da casa de origem
+
+            _x = p_atual->_x;
+            _y = p_atual->_y;
+            return true;
+        }
+
+        wcout << "Jogada invalida6" << endl;
+        return false;
+    }
+}
+
+bool Torre::movimento(wchar_t coluna, int x, Tabuleiro &t) {
+    const int y = static_cast<int>(coluna) - 65;
+    x = 8-x;
+
+    //Checa se a jogada desejada esta dentro do tabuleiro
+    if((y>7 or x>7)or(y<0 or x<0)) {
+        wcout << "Jogada invalida1" << endl;
+        return false;
+    }
+
+    if(y==_y and x==_x or (y!=_y and x!=_x)) {
+        wcout << "Jogada invalida2" << endl;
+        return false;
+    }
+
+    auto p_atual = t.descobre_tipo(_x, _y);
+
+    //Peça preta
+    if(!p_atual->eh_branco()) {
+        if(x==_x) {
+            if (y>_y) {
+                for(int pos=_y; pos<=y; pos++) {
+                    auto p_nova = t.descobre_tipo(x, pos);
+
+                    if(p_nova->_simbolo == L'\u3000' and pos<y) {
+                        continue;
+                    }
+                    if(p_nova->_simbolo == L'\u3000' and pos==y) {
+                        troca_posicao(p_atual, p_nova); //Inverte o indice das peças
+                        swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+
+                        _x = p_atual->_x;
+                        _y = p_atual->_y;
+                        return true;
+                    }
+                    if(p_nova->eh_branco() and pos==y) {
+                        troca_posicao(p_atual, p_nova); //Inverte o indice das peças
+                        swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+
+                        _x = p_atual->_x;
+                        _y = p_atual->_y;
+                        return true;
+                    }
+
+                    wcout << "Jogada invalida" << endl;
+                    return false;
+                }
             }
             else {
-                wcout << "Jogada invalida2" << endl;
+                for(int pos=_y; pos>=y; pos--) {
+                    auto p_nova = t.descobre_tipo(x, pos);
+
+                    if(p_nova->_simbolo == L'\u3000' and pos<y) {
+                        continue;
+                    }
+                    if(p_nova->_simbolo == L'\u3000' and pos==y) {
+                        troca_posicao(p_atual, p_nova); //Inverte o indice das peças
+                        swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+
+                        _x = p_atual->_x;
+                        _y = p_atual->_y;
+                        return true;
+                    }
+                    if(p_nova->eh_branco() and pos==y) {
+                        troca_posicao(p_atual, p_nova); //Inverte o indice das peças
+                        swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+
+                        _x = p_atual->_x;
+                        _y = p_atual->_y;
+                        return true;
+                    }
+
+                    wcout << "Jogada invalida" << endl;
+                    return false;
+                }
             }
         }
         else {
-            if(y==_y and x==_x-1) {
-                troca_posicao(p_atual, p_nova); //Inverte o indice das peças
-                swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+            if (x>_x) {
+                for(int pos=_x; pos<=x; pos++) {
+                    auto p_nova = t.descobre_tipo(pos, y);
+
+                    if(p_nova->_simbolo == L'\u3000' and pos<x) {
+                        continue;
+                    }
+                    if(p_nova->_simbolo == L'\u3000' and pos==x) {
+                        troca_posicao(p_atual, p_nova); //Inverte o indice das peças
+                        swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+
+                        _x = p_atual->_x;
+                        _y = p_atual->_y;
+                        return true;
+                    }
+                    if(p_nova->eh_branco() and pos==x) {
+                        troca_posicao(p_atual, p_nova); //Inverte o indice das peças
+                        swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+
+                        _x = p_atual->_x;
+                        _y = p_atual->_y;
+                        return true;
+                    }
+
+                    wcout << "Jogada invalida" << endl;
+                    return false;
+                }
             }
             else {
-                wcout << "Jogada invalida3" << endl;
+                for(int pos=_x; pos>=x; pos--) {
+                    auto p_nova = t.descobre_tipo(pos, y);
+
+                    if(p_nova->_simbolo == L'\u3000' and pos<x) {
+                        continue;
+                    }
+                    if(p_nova->_simbolo == L'\u3000' and pos==x) {
+                        troca_posicao(p_atual, p_nova); //Inverte o indice das peças
+                        swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+
+                        _x = p_atual->_x;
+                        _y = p_atual->_y;
+                        return true;
+                    }
+                    if(p_nova->eh_branco() and pos==x) {
+                        troca_posicao(p_atual, p_nova); //Inverte o indice das peças
+                        swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+
+                        _x = p_atual->_x;
+                        _y = p_atual->_y;
+                        return true;
+                    }
+
+                    wcout << "Jogada invalida" << endl;
+                    return false;
+                }
             }
         }
     }
-    _x = p_atual->_x;
-    _y = p_atual->_y;
+
+    else {
+        if(x==_x) {
+            if (y>_y) {
+                for(int pos=_y+1; pos<=y; pos++) {
+                    auto p_nova = t.descobre_tipo(x, pos);
+
+                    if(p_nova->_simbolo == L'\u3000' and pos<y) {
+                        continue;
+                    }
+                    if(p_nova->_simbolo == L'\u3000' and pos==y) {
+                        troca_posicao(p_atual, p_nova); //Inverte o indice das peças
+                        swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+
+                        _x = p_atual->_x;
+                        _y = p_atual->_y;
+                        return true;
+                    }
+                    if(!p_nova->eh_branco() and pos==y) {
+                        troca_posicao(p_atual, p_nova); //Inverte o indice das peças
+                        swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+                        t.tabuleiro[_x][_y] = Peca(L'\u3000', _x, _y); //Reseta o valor da casa de origem
+
+                        _x = p_atual->_x;
+                        _y = p_atual->_y;
+                        return true;
+                    }
+
+                    wcout << "Jogada invalida3" << endl;
+                    return false;
+                }
+            }
+            else {
+                for(int pos=_y-1; pos>=y; pos--) {
+                    auto p_nova = t.descobre_tipo(x, pos);
+                    p_nova->imprimirSimbolo();
+                    wcout << endl;
+
+                    if(p_nova->_simbolo == L'\u3000' and pos>y) {
+                        continue;
+                    }
+                    if(p_nova->_simbolo == L'\u3000' and pos==y) {
+                        troca_posicao(p_atual, p_nova); //Inverte o indice das peças
+                        swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+
+                        _x = p_atual->_x;
+                        _y = p_atual->_y;
+                        return true;
+                    }
+                    if(!p_nova->eh_branco() and pos==y) {
+                        troca_posicao(p_atual, p_nova); //Inverte o indice das peças
+                        swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+                        t.tabuleiro[_x][_y] = Peca(L'\u3000', _x, _y); //Reseta o valor da casa de origem
+
+                        _x = p_atual->_x;
+                        _y = p_atual->_y;
+                        return true;
+                    }
+
+                    wcout << "Jogada invalida4" << endl;
+                    return false;
+                }
+            }
+        }
+        else {
+            if (x>_x) {
+                for(int pos=_x+1; pos<=x; pos++) {
+                    auto p_nova = t.descobre_tipo(pos, y);
+
+                    if(p_nova->_simbolo == L'\u3000' and pos<x) {
+                        continue;
+                    }
+                    if(p_nova->_simbolo == L'\u3000' and pos==x) {
+                        troca_posicao(p_atual, p_nova); //Inverte o indice das peças
+                        swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+
+                        _x = p_atual->_x;
+                        _y = p_atual->_y;
+                        return true;
+                    }
+                    if(!p_nova->eh_branco() and pos==x) {
+                        troca_posicao(p_atual, p_nova); //Inverte o indice das peças
+                        swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+                        t.tabuleiro[_x][_y] = Peca(L'\u3000', _x, _y); //Reseta o valor da casa de origem
+
+                        _x = p_atual->_x;
+                        _y = p_atual->_y;
+                        return true;
+                    }
+
+                    wcout << "Jogada invalida5" << endl;
+                    return false;
+                }
+            }
+            else {
+                for(int pos=_x-1; pos>=x; pos--) {
+                    auto p_nova = t.descobre_tipo(pos, y);
+                    p_nova->imprimirSimbolo();
+                    wcout << endl;
+
+                    if(p_nova->_simbolo == L'\u3000' and pos>x) {
+                        continue;
+                    }
+                    if(p_nova->_simbolo == L'\u3000' and pos==x) {
+                        troca_posicao(p_atual, p_nova); //Inverte o indice das peças
+                        swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+
+                        _x = p_atual->_x;
+                        _y = p_atual->_y;
+                        return true;
+                    }
+                    if(!p_nova->eh_branco() and pos==x) {
+                        troca_posicao(p_atual, p_nova); //Inverte o indice das peças
+                        swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+                        t.tabuleiro[_x][_y] = Peca(L'\u3000', _x, _y); //Reseta o valor da casa de origem
+
+                        _x = p_atual->_x;
+                        _y = p_atual->_y;
+                        return true;
+                    }
+
+                    wcout << "Jogada invalida6" << endl;
+                    return false;
+                }
+            }
+        }
+    }
+
+    return false;
+
+}
+
+bool Cavalo::movimento(wchar_t coluna, int x, Tabuleiro &t) {
+    const int y = static_cast<int>(coluna) - 65;
+    x = 8-x;
+
+    //Checa se a jogada desejada esta dentro do tabuleiro
+    if((y>7 or x>7)or(y<0 or x<0)) {
+        wcout << "Jogada invalida1" << endl;
+        return false;
+    }
+
+    if(y==_y and x==_x) {
+        wcout << "Jogada invalida" << endl;
+        return false;
+    }
+
+    auto p_atual = t.descobre_tipo(_x, _y);
+    auto p_nova = t.descobre_tipo(x, y);
+
+    //Peça preta
+    if(!p_atual->eh_branco()) {
+        if (abs(x-_x)+abs(y-_y)==3 and abs(x-_x)>0 and abs(y-_y)>0 and (p_nova->eh_branco() or p_nova->_simbolo==L'\u3000')) {
+            troca_posicao(p_atual, p_nova); //Inverte o indice das peças
+            swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+            t.tabuleiro[_x][_y] = Peca(L'\u3000', _x, _y); //Reseta o valor da casa de origem
+
+            _x = p_atual->_x;
+            _y = p_atual->_y;
+            return true;
+        }
+
+        wcout << "Jogada invalida" << endl;
+        return false;
+    }
+
+    else{
+        if (abs(x-_x)+abs(y-_y)==3 and abs(x-_x)>0 and abs(y-_y)>0 and (!p_nova->eh_branco() or p_nova->_simbolo==L'\u3000')) {
+            troca_posicao(p_atual, p_nova); //Inverte o indice das peças
+            swap(t.tabuleiro[_x][_y], t.tabuleiro[x][y]); //Inverte a posição das peças no tabuleiro
+            t.tabuleiro[_x][_y] = Peca(L'\u3000', _x, _y); //Reseta o valor da casa de origem
+
+            _x = p_atual->_x;
+            _y = p_atual->_y;
+            return true;
+    }
+
+        wcout << "Jogada invalida" << endl;
+        return false;
+    }
 }
 
 bool Tabuleiro::jogada(wchar_t y_o, int x_o, wchar_t y_d, int x_d, const bool vez) {
@@ -162,26 +531,27 @@ bool Tabuleiro::jogada(wchar_t y_o, int x_o, wchar_t y_d, int x_d, const bool ve
 
     if (vez) {
         auto p_origem = this->descobre_tipo(x_o, y1_o);
-        if(p_origem->_simbolo >= L'\u2654' and p_origem->_simbolo <= L'\u2659') {
+        if(p_origem->eh_branco()) {
             p_origem->movimento(y_d, x_d, *this);
         }
         else {
-            wcout << "Jogada invalida" << endl;
+            wcout << "Jogada invalidaBABA" << endl;
             return false;
         }
     }
     else {
         auto p_origem = this->descobre_tipo(x_o, y1_o);
-        if(!(p_origem->_simbolo >= L'\u2654' and p_origem->_simbolo <= L'\u2659')) {
+        if(!p_origem->eh_branco()) {
             p_origem->movimento(y_d, x_d, *this);
         }
         else {
-            wcout << "Jogada invalida" << endl;
+            wcout << "Jogada invalidaLALA" << endl;
             return false;
         }
     }
     return true;
 }
+
 
 
 
