@@ -27,8 +27,10 @@ public:
     Tabuleiro();
 
     void imprimir_Tabuleiro() const;
+    int Chess();
+    bool jogada(int x_o, int y_o, int x_d, int y_d, bool vez);
+
     [[nodiscard]] unique_ptr<Peca> descobre_tipo(int x, int y) const;
-    bool jogada(wchar_t y_o, int x_o, wchar_t y_d, int x_d, bool vez);
 };
 
 class Peca {
@@ -53,7 +55,7 @@ public:
         return false;
     }
 
-    virtual bool movimento(wchar_t coluna, int x, Tabuleiro &t) {return false;}
+    virtual bool movimento(int x, int y, Tabuleiro &t) {return false;}
     friend void troca_posicao(unique_ptr<Peca> &p1, unique_ptr<Peca> &p2);
 };
 
@@ -65,7 +67,7 @@ public:
         wcout << L" " << _simbolo << L" ";
     }
 
-    bool movimento(wchar_t coluna, int x, Tabuleiro &t) override;
+    bool movimento(int x, int y, Tabuleiro &t) override;
 };
 
 class Torre : public Peca {
@@ -75,7 +77,7 @@ public:
     void imprimirSimbolo() const override {
         wcout << L" " << _simbolo << L" ";
     }
-    bool movimento(wchar_t coluna, int x, Tabuleiro &t) override;
+    bool movimento(int x, int y, Tabuleiro &t) override;
 };
 
 class Cavalo : public Peca {
@@ -85,7 +87,7 @@ public:
     void imprimirSimbolo() const override {
         wcout << L" " << _simbolo << L" ";
     }
-    bool movimento(wchar_t coluna, int x, Tabuleiro &t) override;
+    bool movimento(int x, int y, Tabuleiro &t) override;
 };
 
 class Bispo : public Peca {
